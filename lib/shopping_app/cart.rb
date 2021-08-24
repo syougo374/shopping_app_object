@@ -1,11 +1,18 @@
 require_relative "item_manager"
+require_relative "ownable"
+require_relative "item"
+require_relative "wallet"
+require_relative "seller"
 
-class Cart
+class Cart #< Wallet
   include ItemManager
-
+  include Ownable
   def initialize(owner)
     self.owner = owner
+    # super(owner)
+    #上記でいつもターミナルでやってる hoge.name = "書き換え"これをインスタンス化と同時にやっている処理
     @items = []
+    # @wallet = Wallet.new(owner)
   end
 
   def items
@@ -23,7 +30,16 @@ class Cart
   end
 
   def check_out
+    # binding.irb
     return if owner.wallet.balance < total_amount
+    items.each do |item|
+      price = self.owner.wallet.withdraw(item.price)
+      item.owner.wallet.deposit(price)
+      item.owner = self.owner
+      # binding.irb
+    end
+    items.clear
+    # item.owner.wallet.balacne += self.owner.wallet.withdraw(total_amount)
   # ## 要件
   #   - カートの中身（Cart#items）のすべてのアイテムの購入金額が、カートのオーナーのウォレットからアイテムのオーナーのウォレットに移されること。
   #   - カートの中身（Cart#items）のすべてのアイテムのオーナー権限が、カートのオーナーに移されること。
